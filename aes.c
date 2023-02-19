@@ -38,6 +38,34 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 #include <string.h> // CBC mode, for memset
 #include "aes.h"
 
+#define DEBUG_TINYAES
+#ifdef DEBUG_TINYAES
+void trigger_set(unsigned char channel, int value);
+#include "Port/Std/IfxPort.h"
+
+
+//#define TS(ch) trigger_set(ch, 1)
+//#define TC(ch) trigger_set(ch, 0)
+IFX_INLINE void local_setPinState(Ifx_P *port, uint8 pinIndex, IfxPort_State action)
+{
+    port->OMR.U = action << pinIndex;
+}
+IFX_INLINE void local_setPinHigh(Ifx_P *port, uint8 pinIndex)
+{
+    local_setPinState(port, pinIndex, IfxPort_State_high);
+}
+IFX_INLINE void local_setPinLow(Ifx_P *port, uint8 pinIndex)
+{
+    local_setPinState(port, pinIndex, IfxPort_State_low);
+}
+
+#define TS(ch) local_setPinHigh(&MODULE_P00, ch)
+#define TC(ch) local_setPinLow(&MODULE_P00, ch)
+#else
+#define TS(ch) while(0)
+#define TC(ch) while(0)
+#endif
+
 /*****************************************************************************/
 /* Defines:                                                                  */
 /*****************************************************************************/
@@ -250,7 +278,9 @@ static void AddRoundKey(uint8_t round, state_t* state, const uint8_t* RoundKey)
 // state matrix with values in an S-box.
 static void SubBytes(state_t* state)
 {
+
   uint8_t i, j;
+  TS(6);
   for (i = 0; i < 4; ++i)
   {
     for (j = 0; j < 4; ++j)
@@ -258,6 +288,7 @@ static void SubBytes(state_t* state)
       (*state)[j][i] = getSBoxValue((*state)[j][i]);
     }
   }
+  TC(6);
 }
 
 // The ShiftRows() function shifts the rows in the state to the left.
@@ -413,16 +444,17 @@ static void InvShiftRows(state_t* state)
 static void Cipher(state_t* state, const uint8_t* RoundKey)
 {
   uint8_t round = 0;
-
+//  TS(5);
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(0, state, RoundKey);
-
+//  TC(5);
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
   // These Nr rounds are executed in the loop below.
   // Last one without MixColumns()
   for (round = 1; ; ++round)
   {
+//	  TS(7);
     SubBytes(state);
     ShiftRows(state);
     if (round == Nr) {
@@ -430,9 +462,12 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
     }
     MixColumns(state);
     AddRoundKey(round, state, RoundKey);
+//    TC(7);
   }
   // Add round key to last round
+//  TS(5);
   AddRoundKey(Nr, state, RoundKey);
+//  TC(5);
 }
 
 #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
