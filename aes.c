@@ -40,27 +40,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 #define DEBUG_TINYAES
 #ifdef DEBUG_TINYAES
-void trigger_set(unsigned char channel, int value);
-#include "Port/Std/IfxPort.h"
-
-
-//#define TS(ch) trigger_set(ch, 1)
-//#define TC(ch) trigger_set(ch, 0)
-IFX_INLINE void local_setPinState(Ifx_P *port, uint8 pinIndex, IfxPort_State action)
-{
-    port->OMR.U = action << pinIndex;
-}
-IFX_INLINE void local_setPinHigh(Ifx_P *port, uint8 pinIndex)
-{
-    local_setPinState(port, pinIndex, IfxPort_State_high);
-}
-IFX_INLINE void local_setPinLow(Ifx_P *port, uint8 pinIndex)
-{
-    local_setPinState(port, pinIndex, IfxPort_State_low);
-}
-
-#define TS(ch) local_setPinHigh(&MODULE_P00, ch)
-#define TC(ch) local_setPinLow(&MODULE_P00, ch)
+#include "simpleserial_shared/hal.h"
 #else
 #define TS(ch) while(0)
 #define TC(ch) while(0)
@@ -246,7 +226,9 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
 
 void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key)
 {
+	TS(0);
   KeyExpansion(ctx->RoundKey, key);
+  TC(0);
 }
 #if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
 void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
@@ -459,6 +441,7 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
     ShiftRows(state);
     if (round == Nr) {
       break;
+//      TC(7);
     }
     MixColumns(state);
     AddRoundKey(round, state, RoundKey);
