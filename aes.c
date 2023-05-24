@@ -40,7 +40,8 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 #define DEBUG_TINYAES
 #ifdef DEBUG_TINYAES
-#include "simpleserial_shared/hal.h"
+//#include "simpleserial_shared/hal.h"
+ #include "hal.h"
 #else
 #define TS(ch) while(0)
 #define TC(ch) while(0)
@@ -426,31 +427,33 @@ static void InvShiftRows(state_t* state)
 static void Cipher(state_t* state, const uint8_t* RoundKey)
 {
   uint8_t round = 0;
-//  TS(5);
+  TS(5);
   // Add the First round key to the state before starting the rounds.
   AddRoundKey(0, state, RoundKey);
-//  TC(5);
+  TC(5);
   // There will be Nr rounds.
   // The first Nr-1 rounds are identical.
   // These Nr rounds are executed in the loop below.
   // Last one without MixColumns()
+  trigger_high();
   for (round = 1; ; ++round)
   {
-//	  TS(7);
+	  TS(7);
     SubBytes(state);
     ShiftRows(state);
     if (round == Nr) {
       break;
-//      TC(7);
+      TC(7);
     }
+	  TS(7);
     MixColumns(state);
     AddRoundKey(round, state, RoundKey);
-//    TC(7);
+    TC(7);
   }
   // Add round key to last round
-//  TS(5);
+  TS(5);
   AddRoundKey(Nr, state, RoundKey);
-//  TC(5);
+  TC(5);
 }
 
 #if (defined(CBC) && CBC == 1) || (defined(ECB) && ECB == 1)
