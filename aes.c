@@ -40,8 +40,11 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 #define DEBUG_TINYAES
 #ifdef DEBUG_TINYAES
-//#include "simpleserial_shared/hal.h"
- #include "hal.h"
+#ifdef __MICROBLAZE__
+#include "hal.h"
+#else
+#include "simpleserial_shared/hal.h"
+#endif
 #else
 #define TS(ch) while(0)
 #define TC(ch) while(0)
@@ -227,9 +230,7 @@ static void KeyExpansion(uint8_t* RoundKey, const uint8_t* Key)
 
 void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key)
 {
-	TS(0);
   KeyExpansion(ctx->RoundKey, key);
-  TC(0);
 }
 #if (defined(CBC) && (CBC == 1)) || (defined(CTR) && (CTR == 1))
 void AES_init_ctx_iv(struct AES_ctx* ctx, const uint8_t* key, const uint8_t* iv)
@@ -435,7 +436,7 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
   // The first Nr-1 rounds are identical.
   // These Nr rounds are executed in the loop below.
   // Last one without MixColumns()
-  trigger_high();
+//  trigger_high();
   for (round = 1; ; ++round)
   {
 	  TS(7);
