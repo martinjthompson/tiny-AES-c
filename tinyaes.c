@@ -36,9 +36,9 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 /* Includes:                                                                 */
 /*****************************************************************************/
 #include <string.h> // CBC mode, for memset
-#include "aes.h"
+#include "tinyaes.h"
 
-#define DEBUG_TINYAES
+//#define DEBUG_TINYAES
 #ifdef DEBUG_TINYAES
 #ifdef __MICROBLAZE__
 #include "hal.h"
