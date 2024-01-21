@@ -443,8 +443,8 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
     SubBytes(state);
     ShiftRows(state);
     if (round == Nr) {
+        TC(7);
       break;
-      TC(7);
     }
 	  TS(7);
     MixColumns(state);
