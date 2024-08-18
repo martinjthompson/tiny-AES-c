@@ -23,7 +23,7 @@
   #define CTR 1
 #endif
 
-
+#define AES_SINGLE_ROUND 1
 #define AES128 1
 //#define AES192 1
 //#define AES256 1

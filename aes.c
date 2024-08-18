@@ -424,6 +424,11 @@ static void Cipher(state_t* state, const uint8_t* RoundKey)
   for (round = 1; ; ++round)
   {
     SubBytes(state);
+    if (AES_SINGLE_ROUND)
+    {
+    	round = Nr;
+    	break;
+    }
     ShiftRows(state);
     if (round == Nr) {
       break;
